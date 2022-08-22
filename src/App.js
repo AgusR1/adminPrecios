@@ -1,15 +1,16 @@
-import { Container } from "@mui/material";
-import NavBar from "./components/AppBar/NavBar";
+import { Route, Routes } from "react-router";
+import { BrowserRouter } from "react-router-dom";
 import ListMenu from "./components/ListMenu/ListMenu";
+import Login from "./components/Login/Login";
 
 function App() {
   return (
-    <>
-      <NavBar />
-      <Container>
-        <ListMenu />
-      </Container>
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route exact path="/login" element={<Login />} />
+        <Route exact path="/" element={<ListMenu />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

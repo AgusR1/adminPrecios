@@ -7,9 +7,11 @@ import IconButton from "@mui/material/IconButton";
 import { Menu } from "@mui/icons-material";
 import { useState } from "react";
 import SideBar from "../Drawer/SideBar";
+import { useNavigate } from "react-router";
 
 export default function NavBar() {
   const [state, setState] = useState(false);
+  const navigate = useNavigate();
   const showDrawer = (show) => (event) => {
     if (
       event.type === 'keydown' &&
@@ -39,7 +41,7 @@ export default function NavBar() {
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               INICIO
             </Typography>
-            <Button color="inherit">Login</Button>
+            <Button onClick={() => { navigate("/login") }} color="inherit">Login</Button>
           </Toolbar>
         </AppBar>
       </Box>

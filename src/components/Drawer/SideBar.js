@@ -16,7 +16,7 @@ const SideBar = ({ showDrawer, state }) => {
                     <ListItem
                         button
                         onClick={showDrawer(false)}
-                        // component={Link}
+                        component={Link}
                         to="/"
                         key="INICIO"
                     >
@@ -29,7 +29,7 @@ const SideBar = ({ showDrawer, state }) => {
                     <ListItem
                         button
                         onClick={showDrawer(false)}
-                        // component={Link}
+                        component={Link}
                         to="/login"
                         key="SALIR"
                     >
