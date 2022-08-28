@@ -9,6 +9,7 @@ import { useState } from "react";
 import SideBar from "../Drawer/SideBar";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase/firebaseConfig";
+import { Grid } from "@mui/material";
 
 export default function NavBar({ nombre }) {
   const [state, setState] = useState(false);
@@ -27,7 +28,7 @@ export default function NavBar({ nombre }) {
     <>
       <Box sx={{ flexGrow: 1 }}>
         <AppBar position="sticky">
-          <Toolbar>
+          <Toolbar style={{ justifyContent: "space-between" }}>
             <IconButton
               size="large"
               edge="start"
@@ -38,13 +39,23 @@ export default function NavBar({ nombre }) {
             >
               <Menu />
             </IconButton>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              INICIO
-            </Typography>
-            <Typography variant="h6" style={{ marginRight: "10px" }}>
-              {`Bienvenido/a ${nombre}`}
-            </Typography>
-            <Button variant="outlined" startIcon={<ExitToApp />} onClick={() => { signOut(auth) }} color="inherit">LogOut</Button>
+            <Grid sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }} container spacing={2} >
+              <Grid style={{ alignItems: "center", display: "flex" }} item xs={4} >
+                <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                  INICIO
+                </Typography>
+              </Grid>
+              <Grid style={{ alignItems: "center", display: "flex" }} item xs={4}>
+                <Typography variant="body1" style={{ marginRight: "10px" }}>
+                  {`Bienvenido/a ${nombre}`}
+                </Typography>
+              </Grid>
+            </Grid>
+            <Grid style={{ justifyContent: "end", display: "flex" }} item xs={12} >
+              <IconButton style={{ color: "white" }} onClick={() => { signOut(auth) }} aria-label="delete">
+                <ExitToApp />
+              </IconButton>
+            </Grid>
           </Toolbar>
         </AppBar>
       </Box>

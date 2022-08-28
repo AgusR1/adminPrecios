@@ -11,7 +11,7 @@ import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase/firebaseConfig';
 import moment from 'moment';
 
-export default function DialogCreaProducto({ open, setOpen, setStatus, setOpenSnackbar, editing, setEditing, data }) {
+export default function DialogCreaProducto({ open, setOpen, setStatus, setOpenSnackbar, editing, setEditing, data, setSeverity }) {
     const { control, getValues, setValue, handleSubmit } = useForm({
         defaultValues: {
             codigo: '',
@@ -29,10 +29,12 @@ export default function DialogCreaProducto({ open, setOpen, setStatus, setOpenSn
                 modificado: moment(new Date()).format('DD-MM-YYYY'),
                 idUsuario: auth.currentUser.uid,
             });
+            setSeverity("success");
             setStatus("PRODUCTO CREADO EXITOSAMENTE");
             setOpenSnackbar(true);
             setOpen(false);
         } catch (e) {
+            setSeverity("error");
             setStatus("OCURRIO UN ERROR: ", e);
             setOpenSnackbar(true);
             setOpen(false);
@@ -48,11 +50,13 @@ export default function DialogCreaProducto({ open, setOpen, setStatus, setOpenSn
                 modificado: moment(new Date()).format('DD-MM-YYYY'),
             });
             setOpen(false);
+            setSeverity("success");
             setStatus("PRODUCTO EDITADO EXITOSAMENTE");
             setOpenSnackbar(true);
             setEditing(false);
         } catch (e) {
             setOpen(false);
+            setSeverity("error");
             setStatus("OCURRIO UN ERROR: ", e);
             setOpenSnackbar(true);
         }

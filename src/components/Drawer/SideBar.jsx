@@ -1,8 +1,9 @@
 import { ExitToApp, HomeOutlined } from "@mui/icons-material";
 import { Divider, Drawer, List, ListItem, ListItemIcon, ListItemText } from "@mui/material";
+import { signOut } from "firebase/auth";
 import React from "react";
 import { Link } from "react-router-dom";
-
+import { auth } from "../firebase/firebaseConfig";
 const SideBar = ({ showDrawer, state }) => {
 
     return (
@@ -28,9 +29,7 @@ const SideBar = ({ showDrawer, state }) => {
                     <Divider />
                     <ListItem
                         button
-                        onClick={showDrawer(false)}
-                        component={Link}
-                        to="/login"
+                        onClick={() => { showDrawer(false); signOut(auth) }}
                         key="SALIR"
                     >
                         <ListItemIcon>

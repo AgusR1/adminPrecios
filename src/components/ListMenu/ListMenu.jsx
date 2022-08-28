@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { Add, Delete, Edit } from "@mui/icons-material";
-import { Button, Grid, Snackbar, TextField } from "@mui/material";
+import { Alert, Button, Grid, Snackbar, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { DataGrid, GridActionsCellItem, GridToolbar } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
@@ -19,6 +19,7 @@ const ListMenu = () => {
     const [dato, setDato] = useState(null);
     const [user, loading] = useAuthState(auth);
     const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [severity, setSeverity] = useState(null);
     const navigate = useNavigate();
     const StyledGridOverlay = styled('div')(({ theme }) => ({
         display: 'flex',
@@ -89,39 +90,85 @@ const ListMenu = () => {
             </StyledGridOverlay>
         );
     }
+    const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
+        border: 0,
+        color:
+            theme.palette.mode === 'light' ? 'rgba(0,0,0,.85)' : 'rgba(255,255,255,0.85)',
+        fontFamily: [
+            '-apple-system',
+            'BlinkMacSystemFont',
+            '"Segoe UI"',
+            'Roboto',
+            '"Helvetica Neue"',
+            'Arial',
+            'sans-serif',
+            '"Apple Color Emoji"',
+            '"Segoe UI Emoji"',
+            '"Segoe UI Symbol"',
+        ].join(','),
+        WebkitFontSmoothing: 'auto',
+        letterSpacing: 'normal',
+        '& .MuiDataGrid-columnsContainer': {
+            backgroundColor: theme.palette.mode === 'light' ? '#fafafa' : '#1d1d1d',
+        },
+        '& .MuiDataGrid-iconSeparator': {
+            display: 'none',
+        },
+        '& .MuiDataGrid-columnHeader, .MuiDataGrid-cell': {
+            borderRight: `1px solid ${theme.palette.mode === 'light' ? '#f0f0f0' : '#303030'
+                }`,
+        },
+        '& .MuiDataGrid-columnsContainer, .MuiDataGrid-cell': {
+            borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#f0f0f0' : '#303030'
+                }`,
+        },
+        '& .MuiDataGrid-cell': {
+            color:
+                theme.palette.mode === 'light' ? 'rgba(0,0,0,.85)' : 'rgba(255,255,255,0.65)',
+        },
+        '& .MuiPaginationItem-root': {
+            borderRadius: 0,
+        },
+    }));
     const columns = [
         {
             field: 'codigo',
             headerName: 'Codigo',
             type: 'string',
             width: 100,
-            editable: true,
+            resizable: true,
         },
         {
             field: 'nombre',
             headerName: 'Nombre',
             type: 'string',
             width: 200,
-            editable: true,
+            resizable: true,
         },
         {
             field: 'precio',
             headerName: 'Precio',
             type: 'number',
             width: 100,
-            editable: true,
+            resizable: true,
+            renderCell: (params) => {
+                return <Typography>{`$ ${params.row.precio}`}</Typography>
+            },
+            valueGetter: (params) => params.row.precio,
         },
         {
             field: 'modificado',
             headerName: 'Ultima modificacion',
             type: 'string',
             width: 150,
+            resizable: true,
         },
         {
             field: 'registrado',
             headerName: 'Registrado',
             type: 'string',
             width: 150,
+            resizable: true,
         },
         {
             field: 'actions',
@@ -151,6 +198,7 @@ const ListMenu = () => {
     ]
     const deleteProducto = async (data) => {
         await deleteDoc(doc(db, "productos", data.id));
+        setSeverity("success");
         setStatus("PRODUCTO ELIMINADO");
         setOpenSnackbar(true);
     }
@@ -189,27 +237,26 @@ const ListMenu = () => {
     return (
         <>
             <NavBar nombre={user?.displayName} />
-            {open && < DialogCreaProducto setRows={setRows} setOpenSnackbar={setOpenSnackbar} setStatus={setStatus} open={open} setOpen={setOpen} setEditing={setEditing} editing={editing} data={dato} />}
+            {open && < DialogCreaProducto setSeverity={setSeverity} setRows={setRows} setOpenSnackbar={setOpenSnackbar} setStatus={setStatus} open={open} setOpen={setOpen} setEditing={setEditing} editing={editing} data={dato} />}
             <Snackbar
                 open={openSnackbar}
                 autoHideDuration={6000}
-                onClose={handleClose}
-                message={status}
-            />
+            >
+                <Alert onClose={handleClose} severity={severity} sx={{ width: '100%' }}>
+                    {status}
+                </Alert>
+            </Snackbar>
             <div
                 style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    padding: 25,
+                    padding: 10,
                     height: '89%',
                     width: '100%',
                 }}
             >
-                <Grid container spacing={2}>
-                    <Grid style={{
-                        display: "flex",
-                        justifyContent: "right"
-                    }} item xs={12}>
+                <Grid container spacing={1}>
+                    <Grid sx={{ display: "flex", flexGrow: 1, justifyContent: { xs: 'center', md: "right" } }} item xs={12}>
                         <Button onClick={() => { setOpen(true) }} variant="contained" color="primary" aria-label="add to shopping cart">
                             <Add />
                             Crear nuevo producto
@@ -228,17 +275,26 @@ const ListMenu = () => {
                         style={{
                             flex: 1,
                             width: '100%',
-                            marginTop: '25px',
+                            marginTop: '10px',
                             marginBottom: '25px',
                         }}
                     >
-                        <DataGrid
+                        <StyledDataGrid
                             components={{
                                 Toolbar: GridToolbar,
                                 NoRowsOverlay: CustomNoRowsOverlay,
                             }}
                             rows={rows}
                             columns={columns}
+                            sx={{
+                                boxShadow: 2,
+                                border: 2,
+                                padding: "1em",
+                                borderColor: 'primary.light',
+                                '& .MuiDataGrid-cell:hover': {
+                                    color: 'primary.main',
+                                },
+                            }}
                         />
                     </div>
                 </div>

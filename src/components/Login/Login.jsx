@@ -6,7 +6,7 @@ import Container from '@mui/material/Container';
 import { signInWithPopup, GoogleAuthProvider, getAuth, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { useNavigate } from 'react-router';
 import { auth } from '../firebase/firebaseConfig';
-import { Snackbar } from '@mui/material';
+import { Alert, Snackbar } from '@mui/material';
 import GoogleButton from 'react-google-button'
 
 function Copyright(props) {
@@ -26,6 +26,7 @@ export default function Login() {
     const [status, setStatus] = React.useState("");
     const provider = new GoogleAuthProvider();
     const [openSnackbar, setOpenSnackbar] = React.useState(false);
+    const [severity, setSeverity] = React.useState(null);
     const navigate = useNavigate();
 
     const registerGoogle = async () => {
@@ -33,15 +34,18 @@ export default function Login() {
             .then(async () => {
                 try {
                     await signInWithPopup(auth, provider);
-                    setOpenSnackbar(true);
+                    setSeverity("success");
                     setStatus("LOGIN EXITOSO");
+                    setOpenSnackbar(true);
                     setTimeout(() => { navigate("/"); }, 2000);
                 } catch (error) {
+                    setSeverity("error");
                     setOpenSnackbar(true);
                     setStatus(`${error}`);
                 }
             })
             .catch((error) => {
+                setSeverity("error");
                 setOpenSnackbar(true);
                 setStatus(`${error}`);
             });
@@ -61,7 +65,11 @@ export default function Login() {
                 autoHideDuration={6000}
                 onClose={handleClose}
                 message={status}
-            />
+            >
+                <Alert onClose={handleClose} severity={severity} sx={{ width: '100%' }}>
+                    {status}
+                </Alert>
+            </Snackbar>
             <Box
                 sx={{
                     width: 300,
