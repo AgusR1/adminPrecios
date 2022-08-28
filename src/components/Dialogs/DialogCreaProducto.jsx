@@ -7,12 +7,12 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import { Grid } from '@mui/material';
 import { Controller, useForm } from 'react-hook-form';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase/firebaseConfig';
 import moment from 'moment';
 
-export default function DialogCreaProducto({ open, setOpen, setStatus, setOpenSnackbar, setRows }) {
-    const { control, getValues, handleSubmit } = useForm({
+export default function DialogCreaProducto({ open, setOpen, setStatus, setOpenSnackbar, editing, setEditing, data }) {
+    const { control, getValues, setValue, handleSubmit } = useForm({
         defaultValues: {
             codigo: '',
             nombre: '',
@@ -21,7 +21,7 @@ export default function DialogCreaProducto({ open, setOpen, setStatus, setOpenSn
     });
     const guardaProducto = async () => {
         try {
-            const docRef = await addDoc(collection(db, "productos"), {
+            await addDoc(collection(db, "productos"), {
                 codigo: getValues('codigo'),
                 nombre: getValues('nombre'),
                 precio: getValues('precio'),
@@ -30,15 +30,6 @@ export default function DialogCreaProducto({ open, setOpen, setStatus, setOpenSn
                 idUsuario: auth.currentUser.uid,
             });
             setStatus("PRODUCTO CREADO EXITOSAMENTE");
-            console.log(docRef);
-            // setRows(productos => [...productos, {
-            //     "id": docRef.id,
-            //     "codigo": doc.data().codigo,
-            //     "nombre": doc.data().nombre,
-            //     "precio": doc.data().precio,
-            //     "registrado": doc.data().registrado,
-            //     "modificado": doc.data().modificado
-            // }]);
             setOpenSnackbar(true);
             setOpen(false);
         } catch (e) {
@@ -47,19 +38,52 @@ export default function DialogCreaProducto({ open, setOpen, setStatus, setOpenSn
             setOpen(false);
         }
     }
+    const actualizaProducto = async () => {
+        const update = doc(db, "productos", data.id);
+        try {
+            await updateDoc(update, {
+                codigo: getValues('codigo'),
+                nombre: getValues('nombre'),
+                precio: getValues('precio'),
+                modificado: moment(new Date()).format('DD-MM-YYYY'),
+            });
+            setOpen(false);
+            setStatus("PRODUCTO EDITADO EXITOSAMENTE");
+            setOpenSnackbar(true);
+            setEditing(false);
+        } catch (e) {
+            setOpen(false);
+            setStatus("OCURRIO UN ERROR: ", e);
+            setOpenSnackbar(true);
+        }
+    }
 
-    const onSubmit = (data, e) => {
-        guardaProducto();
+    const onSubmit = () => {
+        if (editing) {
+            actualizaProducto();
+        } else {
+            guardaProducto();
+        }
     };
 
 
     const handleClose = () => {
+        setEditing(false);
         setOpen(false);
     };
 
+    React.useEffect(() => {
+        if (editing) {
+            setValue("codigo", data.row.codigo);
+            setValue("nombre", data.row.nombre);
+            setValue("precio", data.row.precio);
+        }
+    }, []);
+
     return (
         <Dialog open={open} onClose={handleClose}>
-            <DialogTitle>Crea un nuevo producto</DialogTitle>
+            {editing ? <DialogTitle>EDITA UN PRODUCTO</DialogTitle> : <DialogTitle>CREA UN PRODUCTO</DialogTitle>}
+
             <form onSubmit={handleSubmit(onSubmit)}>
                 <DialogContent>
                     <Grid container rowSpacing={2}>

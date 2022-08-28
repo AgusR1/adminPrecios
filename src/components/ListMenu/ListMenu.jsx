@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { Add, Delete } from "@mui/icons-material";
+import { Add, Delete, Edit } from "@mui/icons-material";
 import { Button, Grid, Snackbar, TextField } from "@mui/material";
 import { Box } from "@mui/system";
 import { DataGrid, GridActionsCellItem, GridToolbar } from "@mui/x-data-grid";
@@ -8,14 +8,15 @@ import NavBar from "../AppBar/NavBar";
 import DialogCreaProducto from "../Dialogs/DialogCreaProducto";
 import { useNavigate } from "react-router";
 import { auth, db } from '../firebase/firebaseConfig';
-import { collection, deleteDoc, doc, getDocs, query, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, onSnapshot, query, where } from "firebase/firestore";
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { v4 as uuidv4 } from 'uuid';
 
 const ListMenu = () => {
     const [rows, setRows] = useState([]);
     const [open, setOpen] = useState(false);
     const [status, setStatus] = useState("");
+    const [editing, setEditing] = useState(false);
+    const [dato, setDato] = useState(null);
     const [user, loading] = useAuthState(auth);
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const navigate = useNavigate();
@@ -135,8 +136,15 @@ const ListMenu = () => {
                         icon={<Delete />}
                         type="button"
                         color="inherit"
-                        onClick={(e) => deleteProducto(data.row)}
+                        onClick={(e) => deleteProducto(data)}
                     />,
+                    <GridActionsCellItem
+                        label="editar"
+                        icon={<Edit />}
+                        type="button"
+                        color="inherit"
+                        onClick={(e) => { setEditing(true); setDato(data); setOpen(true) }}
+                    />
                 ];
             },
         },
@@ -146,24 +154,23 @@ const ListMenu = () => {
         setStatus("PRODUCTO ELIMINADO");
         setOpenSnackbar(true);
     }
-
-    async function getInfo() {
-        let productos = [];
-        const q = query(collection(db, "productos"), where("idUsuario", "==", auth.currentUser.uid));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-            productos.push(doc.data());
-        })
-        setRows(
-            productos.map((item) => {
-                return { ...item, id: uuidv4() };
-            })
-        );
-
-    }
     useEffect(() => {
         if (user) {
-            getInfo();
+            const q = query(collection(db, "productos"), where("idUsuario", "==", auth.currentUser.uid));
+            const unsubscribe = onSnapshot(q, (querySnapshot) => {
+                const productos = [];
+                const ids = [];
+                querySnapshot.forEach((doc) => {
+                    productos.push(doc.data());
+                    ids.push(doc.id);
+                });
+                setRows(
+                    productos.map((item, index) => {
+                        return { ...item, id: ids[index] };
+                    })
+                );
+            });
+            return () => { unsubscribe() }
         }
     }, [user]);
 
@@ -182,7 +189,7 @@ const ListMenu = () => {
     return (
         <>
             <NavBar nombre={user?.displayName} />
-            {open && < DialogCreaProducto setRows={setRows} setOpenSnackbar={setOpenSnackbar} setStatus={setStatus} open={open} setOpen={setOpen} />}
+            {open && < DialogCreaProducto setRows={setRows} setOpenSnackbar={setOpenSnackbar} setStatus={setStatus} open={open} setOpen={setOpen} setEditing={setEditing} editing={editing} data={dato} />}
             <Snackbar
                 open={openSnackbar}
                 autoHideDuration={6000}
@@ -199,13 +206,10 @@ const ListMenu = () => {
                 }}
             >
                 <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                        <TextField id="outlined-basic" label="Buscar" variant="outlined" />
-                    </Grid>
                     <Grid style={{
                         display: "flex",
                         justifyContent: "right"
-                    }} item xs={6}>
+                    }} item xs={12}>
                         <Button onClick={() => { setOpen(true) }} variant="contained" color="primary" aria-label="add to shopping cart">
                             <Add />
                             Crear nuevo producto
@@ -228,10 +232,14 @@ const ListMenu = () => {
                             marginBottom: '25px',
                         }}
                     >
-                        <DataGrid components={{
-                            Toolbar: GridToolbar,
-                            NoRowsOverlay: CustomNoRowsOverlay,
-                        }} rows={rows} columns={columns} />
+                        <DataGrid
+                            components={{
+                                Toolbar: GridToolbar,
+                                NoRowsOverlay: CustomNoRowsOverlay,
+                            }}
+                            rows={rows}
+                            columns={columns}
+                        />
                     </div>
                 </div>
             </div >
