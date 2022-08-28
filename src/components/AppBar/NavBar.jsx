@@ -4,14 +4,14 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
-import { Menu } from "@mui/icons-material";
+import { ExitToApp, Menu } from "@mui/icons-material";
 import { useState } from "react";
 import SideBar from "../Drawer/SideBar";
-import { useNavigate } from "react-router";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase/firebaseConfig";
 
-export default function NavBar() {
+export default function NavBar({ nombre }) {
   const [state, setState] = useState(false);
-  const navigate = useNavigate();
   const showDrawer = (show) => (event) => {
     if (
       event.type === 'keydown' &&
@@ -41,7 +41,10 @@ export default function NavBar() {
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               INICIO
             </Typography>
-            <Button onClick={() => { navigate("/login") }} color="inherit">Login</Button>
+            <Typography variant="h6" style={{ marginRight: "10px" }}>
+              {`Bienvenido/a ${nombre}`}
+            </Typography>
+            <Button variant="outlined" startIcon={<ExitToApp />} onClick={() => { signOut(auth) }} color="inherit">LogOut</Button>
           </Toolbar>
         </AppBar>
       </Box>
