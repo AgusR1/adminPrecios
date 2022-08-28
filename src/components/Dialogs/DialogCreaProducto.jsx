@@ -70,7 +70,6 @@ export default function DialogCreaProducto({ open, setOpen, setStatus, setOpenSn
         }
     };
 
-
     const handleClose = () => {
         setEditing(false);
         setOpen(false);
@@ -92,7 +91,7 @@ export default function DialogCreaProducto({ open, setOpen, setStatus, setOpenSn
                 <DialogContent>
                     <Grid container rowSpacing={2}>
                         <Grid style={{ marginTop: '5px' }} container spacing={2}>
-                            <Grid item xs={6} >
+                            <Grid item xs={12} md={6} >
                                 <Controller
                                     name="codigo"
                                     control={control}
@@ -117,7 +116,7 @@ export default function DialogCreaProducto({ open, setOpen, setStatus, setOpenSn
                                     )}
                                 />
                             </Grid>
-                            <Grid item xs={6} >
+                            <Grid item xs={12} md={6} >
                                 <Controller
                                     name="nombre"
                                     control={control}

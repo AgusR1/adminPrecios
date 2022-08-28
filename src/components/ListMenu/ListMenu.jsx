@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { Add, Delete, Edit } from "@mui/icons-material";
+import { Add, Delete, Edit, Search } from "@mui/icons-material";
 import { Alert, Button, Grid, Snackbar, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { DataGrid, GridActionsCellItem, GridToolbar } from "@mui/x-data-grid";
@@ -10,6 +10,7 @@ import { useNavigate } from "react-router";
 import { auth, db } from '../firebase/firebaseConfig';
 import { collection, deleteDoc, doc, onSnapshot, query, where } from "firebase/firestore";
 import { useAuthState } from 'react-firebase-hooks/auth';
+import DialogDetalle from "../Dialogs/DialogDetalles";
 
 const ListMenu = () => {
     const [rows, setRows] = useState([]);
@@ -17,6 +18,7 @@ const ListMenu = () => {
     const [status, setStatus] = useState("");
     const [editing, setEditing] = useState(false);
     const [dato, setDato] = useState(null);
+    const [openDetalle, setOpenDetalle] = useState(false);
     const [user, loading] = useAuthState(auth);
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [severity, setSeverity] = useState(null);
@@ -132,58 +134,34 @@ const ListMenu = () => {
     }));
     const columns = [
         {
-            field: 'codigo',
-            headerName: 'Codigo',
-            type: 'string',
-            width: 100,
-            resizable: true,
-        },
-        {
             field: 'nombre',
             headerName: 'Nombre',
             type: 'string',
             width: 200,
-            resizable: true,
         },
         {
             field: 'precio',
             headerName: 'Precio',
             type: 'number',
             width: 100,
-            resizable: true,
             renderCell: (params) => {
                 return <Typography>{`$ ${params.row.precio}`}</Typography>
             },
             valueGetter: (params) => params.row.precio,
         },
         {
-            field: 'modificado',
-            headerName: 'Ultima modificacion',
-            type: 'string',
-            width: 150,
-            resizable: true,
-        },
-        {
-            field: 'registrado',
-            headerName: 'Registrado',
-            type: 'string',
-            width: 150,
-            resizable: true,
-        },
-        {
             field: 'actions',
             type: 'actions',
             headerName: 'Acciones',
             width: 150,
-            resizable: false,
             getActions: (data) => {
                 return [
                     <GridActionsCellItem
                         label="visor"
-                        icon={<Delete />}
+                        icon={<Search />}
                         type="button"
                         color="inherit"
-                        onClick={(e) => deleteProducto(data)}
+                        onClick={(e) => { setDato(data); setOpenDetalle(true) }}
                     />,
                     <GridActionsCellItem
                         label="editar"
@@ -191,7 +169,14 @@ const ListMenu = () => {
                         type="button"
                         color="inherit"
                         onClick={(e) => { setEditing(true); setDato(data); setOpen(true) }}
-                    />
+                    />,
+                    <GridActionsCellItem
+                        label="delete"
+                        icon={<Delete />}
+                        type="button"
+                        color="inherit"
+                        onClick={(e) => deleteProducto(data)}
+                    />,
                 ];
             },
         },
@@ -238,6 +223,7 @@ const ListMenu = () => {
         <>
             <NavBar nombre={user?.displayName} />
             {open && < DialogCreaProducto setSeverity={setSeverity} setRows={setRows} setOpenSnackbar={setOpenSnackbar} setStatus={setStatus} open={open} setOpen={setOpen} setEditing={setEditing} editing={editing} data={dato} />}
+            {openDetalle && <DialogDetalle data={dato} setOpenDetalle={setOpenDetalle} open={openDetalle} />}
             <Snackbar
                 open={openSnackbar}
                 autoHideDuration={6000}

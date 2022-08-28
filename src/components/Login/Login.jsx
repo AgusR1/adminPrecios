@@ -12,12 +12,10 @@ import GoogleButton from 'react-google-button'
 function Copyright(props) {
     return (
         <Typography variant="body2" color="text.secondary" align="center" {...props}>
-            {'Copyright © '}
-            <Link color="inherit" href="https://mui.com/">
-                Your Website
-            </Link>{' '}
-            {new Date().getFullYear()}
-            {'.'}
+            {'Contacto '}
+            <Link color="inherit" href="https://www.linkedin.com/in/agust%C3%ADn-rosales-aimale-945342120/">
+                LinkedIn
+            </Link>
         </Typography>
     );
 }
