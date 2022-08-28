@@ -154,7 +154,6 @@ export default function DialogCreaProducto({ open, setOpen, setStatus, setOpenSn
                                     fieldState: { error },
                                 }) => (
                                     <TextField
-                                        autoFocus={true}
                                         fullWidth
                                         id="precio"
                                         error={!!error}
