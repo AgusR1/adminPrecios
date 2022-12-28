@@ -134,6 +134,12 @@ const ListMenu = () => {
     }));
     const columns = [
         {
+            field: 'codigo',
+            headerName: 'Codigo',
+            type: 'string',
+            width: 100,
+        },
+        {
             field: 'nombre',
             headerName: 'Nombre',
             type: 'string',
