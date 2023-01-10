@@ -1,6 +1,14 @@
 import styled from "@emotion/styled";
 import { Add, Delete, Edit, Search } from "@mui/icons-material";
-import { Alert, Autocomplete, Button, Grid, Snackbar, TextField, Typography } from "@mui/material";
+import {
+  Alert,
+  Autocomplete,
+  Button,
+  Grid,
+  Snackbar,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { Box } from "@mui/system";
 import { DataGrid, GridActionsCellItem, GridToolbar } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
@@ -21,6 +29,7 @@ import DialogDetalle from "../Dialogs/DialogDetalles";
 
 const ListMenu = () => {
   const [rows, setRows] = useState([]);
+  const [filteredRows, setFilteredRows] = useState([]);
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState("");
   const [editing, setEditing] = useState(false);
@@ -231,6 +240,11 @@ const ListMenu = () => {
             return { ...item, id: ids[index] };
           })
         );
+        setFilteredRows(
+          productos.map((item, index) => {
+            return { ...item, id: ids[index] };
+          })
+        );
       });
       return () => {
         unsubscribe();
@@ -248,6 +262,19 @@ const ListMenu = () => {
       return;
     }
     setOpenSnackbar(false);
+  };
+
+  const busqueda = (e) => {
+    let busqueda = new RegExp(`${e}`, "i");
+    let resultado = [];
+    resultado = rows.filter((item) => {
+      return (
+        (item.nombre.search(busqueda) !== -1 ||
+          item.codigo.search(busqueda) !== -1) &&
+        item
+      );
+    });
+    setFilteredRows(resultado);
   };
 
   return (
@@ -292,11 +319,23 @@ const ListMenu = () => {
             <Autocomplete
               disablePortal
               id="busqueda"
-              options={[]}
+              options={rows}
+              getOptionLabel={(option) => {
+                return `${option.codigo} - ${option.nombre}`;
+              }}
+              onInputChange={(e) => {
+                busqueda(e.target.value);
+              }}
+              onChange={(e) => {
+                busqueda(e.target.value);
+              }}
               sx={{ width: 300 }}
-              renderInput={(params) => <TextField {...params} label="Buscar producto" />}
+              renderInput={(params) => (
+                <TextField {...params} label="Buscar producto" />
+              )}
             />
           </Grid>
+
           <Grid
             sx={{
               display: "flex",
@@ -340,7 +379,7 @@ const ListMenu = () => {
                 Toolbar: GridToolbar,
                 NoRowsOverlay: CustomNoRowsOverlay,
               }}
-              rows={rows}
+              rows={filteredRows}
               columns={columns}
               sx={{
                 boxShadow: 2,
